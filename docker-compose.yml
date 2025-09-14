@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8
+    container_name: my-sql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: notesdb
+      MYSQL_USER: ziad
+      MYSQL_PASSWORD: ziadpass
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  note-app:
+    build: .
+    container_name: flask
+    ports:
+      - 8080:8080
+    volumes:
+      - /home/ziad/note-app:/app
+    environment:
+      DB_HOST: db
+      DB_USER: ziad
+      DB_PASS: ziadpass
+      DB_NAME: notesdb
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+
